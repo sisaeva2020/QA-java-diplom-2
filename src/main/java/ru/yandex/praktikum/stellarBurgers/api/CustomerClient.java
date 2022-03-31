@@ -3,6 +3,7 @@ package ru.yandex.praktikum.stellarBurgers.api;
 import io.qameta.allure.Step;
 import ru.yandex.praktikum.stellarBurgers.api.model.Customer;
 import ru.yandex.praktikum.stellarBurgers.api.model.CustomerCredentials;
+
 import static io.restassured.RestAssured.given;
 
 public class CustomerClient extends StellarBurgersRestClient {
@@ -19,6 +20,18 @@ public class CustomerClient extends StellarBurgersRestClient {
                 .then()
                 .extract()
                 .path("accessToken");
+    }
+
+    @Step("Создание покупателя {customer} возвращает True")
+    public boolean createCustomerReturnTrue(Customer customer) {
+        return given()
+                .spec(getBaseSpec())
+                .body(customer)
+                .when()
+                .post(PATH + "register/")
+                .then()
+                .extract()
+                .path("success");
     }
 
     @Step("Создание покупателя {customer} возвращает statusCode")
@@ -45,7 +58,8 @@ public class CustomerClient extends StellarBurgersRestClient {
                 .then()
                 .extract()
                 .path("success");
-}
+    }
+
     @Step("Изменение данных покупателя  {customer} возвращает statusCode")
     public int successfulChangingCustomerDataStatusCode(Customer customer, String accessToken) {
 
@@ -61,7 +75,7 @@ public class CustomerClient extends StellarBurgersRestClient {
     }
 
     @Step("Успешная авторизация {customerCredentials}")
-    public boolean authCustomerWithValidData (CustomerCredentials customerCredentials) {
+    public boolean authCustomerWithValidDataReturnTrue(CustomerCredentials customerCredentials) {
         return given()
                 .spec(getBaseSpec())
                 .body(customerCredentials)
@@ -72,8 +86,20 @@ public class CustomerClient extends StellarBurgersRestClient {
                 .path("success");
     }
 
+    @Step("Успешная авторизация {customerCredentials} возвращает accessToken")
+    public String authCustomerWithValidDataReturnAccessToken(CustomerCredentials customerCredentials) {
+        return given()
+                .spec(getBaseSpec())
+                .body(customerCredentials)
+                .when()
+                .post(PATH + "login/")
+                .then()
+                .extract()
+                .path("accessToken");
+    }
+
     @Step("Успешная авторизация {customerCredentials} возвращает statusCode 200")
-    public int authCustomerWithValidDataReturnStatusCode (CustomerCredentials customerCredentials) {
+    public int authCustomerWithValidDataReturnStatusCode(CustomerCredentials customerCredentials) {
         return given()
                 .spec(getBaseSpec())
                 .body(customerCredentials)

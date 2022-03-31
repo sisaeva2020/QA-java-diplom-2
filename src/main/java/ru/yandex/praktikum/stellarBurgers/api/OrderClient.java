@@ -2,13 +2,14 @@ package ru.yandex.praktikum.stellarBurgers.api;
 
 import io.qameta.allure.Step;
 import ru.yandex.praktikum.stellarBurgers.api.model.Ingredient;
+
 import static io.restassured.RestAssured.given;
 
 public class OrderClient extends StellarBurgersRestClient {
     public final String ORDER_PATH = BASE_URL + "orders/";
 
-    @Step("Успешное создание заказа")
-    public boolean createOrder(Ingredient ingredients, String accessToken) {
+    @Step("Успешное создание заказа  возвращает True")
+    public boolean createOrderReturnTrue(Ingredient ingredients, String accessToken) {
         return given()
                 .spec(getBaseSpec())
                 .auth().oauth2(accessToken)
@@ -19,8 +20,9 @@ public class OrderClient extends StellarBurgersRestClient {
                 .extract()
                 .path("success");
     }
+
     @Step("Успешное создание заказа возвращает statusCode 200")
-    public int createOrderStatusCode(Ingredient ingredients, String accessToken) {
+    public int createOrderReturnStatusCode(Ingredient ingredients, String accessToken) {
         return given()
                 .spec(getBaseSpec())
                 .auth().oauth2(accessToken)
@@ -32,8 +34,22 @@ public class OrderClient extends StellarBurgersRestClient {
                 .statusCode();
     }
 
-    @Step("Получить заказы конкретного покупателя")
-    public boolean getOrdersFromSpecificCustomer(String accessToken) {
+    @Step("Cоздание заказа с неверным хэшем ингредиента возвращает Internal Server Error")
+    public String createOrderReturnError(Ingredient ingredients, String accessToken) {
+        return given()
+                .spec(getBaseSpec())
+                .auth().oauth2(accessToken)
+                .body(ingredients)
+                .when()
+                .post(ORDER_PATH)
+                .then()
+                .extract()
+                .body()
+                .asPrettyString();
+    }
+
+    @Step("Получить заказы конкретного покупателя возвращает True")
+    public boolean getOrdersFromSpecificCustomerReturnTrue(String accessToken) {
         return given()
                 .spec(getBaseSpec())
                 .auth().oauth2(accessToken)
@@ -43,8 +59,9 @@ public class OrderClient extends StellarBurgersRestClient {
                 .extract()
                 .path("success");
     }
+
     @Step("Получить заказы конкретного покупателя statusCode")
-    public int getOrdersFromSpecificCustomerStatusCode(String accessToken) {
+    public int getOrdersFromSpecificCustomerReturnStatusCode(String accessToken) {
         return given()
                 .spec(getBaseSpec())
                 .auth().oauth2(accessToken)
@@ -54,5 +71,4 @@ public class OrderClient extends StellarBurgersRestClient {
                 .extract()
                 .statusCode();
     }
-
 }

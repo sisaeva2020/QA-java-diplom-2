@@ -7,7 +7,7 @@ public class Customer {
     public String password;
     public String name;
 
-    public Customer (String email, String password, String name) {
+    public Customer(String email, String password, String name) {
         this.email = email;
         this.password = password;
         this.name = name;
@@ -17,11 +17,11 @@ public class Customer {
         String email = RandomStringUtils.randomAlphabetic(6) + "@test.ru";
         String password = RandomStringUtils.randomNumeric(6);
         String name = RandomStringUtils.randomAlphabetic(6);
-        return new Customer (email, password, name);
+        return new Customer(email, password, name);
     }
 
     @Override
     public String toString() {
-        return "Customer {email:"+email+",password:"+password+",name:"+name+"}";
+        return "Customer {email:" + email + ",password:" + password + ",name:" + name + "}";
     }
 }
