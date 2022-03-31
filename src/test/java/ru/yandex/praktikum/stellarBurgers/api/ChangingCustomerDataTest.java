@@ -29,7 +29,7 @@ public class ChangingCustomerDataTest {
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         changing = customerClient.successfulChangingCustomerData(new Customer(email, customer.password, customer.name), accessToken);
         customerClient.deleteCustomer(customer, accessToken);
-        assertTrue(changing);
+        assertTrue("Внимание! email не был изменен", changing);
     }
 
     @DisplayName("Успешное изменение email покупателя с авторизацией возвращает StatusCode200")
@@ -49,7 +49,7 @@ public class ChangingCustomerDataTest {
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         changing = customerClient.successfulChangingCustomerData(new Customer(customer.email, password, customer.name), accessToken);
         customerClient.deleteCustomer(customer, accessToken);
-        assertTrue(changing);
+        assertTrue("Внимание! пароль не был изменен", changing);
     }
 
     @DisplayName("Успешное изменение пароля покупателя с авторизацией возвращает statusCode 200")
@@ -69,7 +69,7 @@ public class ChangingCustomerDataTest {
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         changing = customerClient.successfulChangingCustomerData(new Customer(customer.email, customer.password, name), accessToken);
         customerClient.deleteCustomer(customer, accessToken);
-        assertTrue(changing);
+        assertTrue("Внимание! имя не было изменено", changing);
     }
 
     @DisplayName("Успешное изменение имени покупателя с авторизацией возвращает statusCode 200")
@@ -92,7 +92,7 @@ public class ChangingCustomerDataTest {
             customerClient.deleteCustomer(customer, accessToken);
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(changing);
+        assertFalse("Внимание! Изменен email без авторизации", changing);
     }
 
     @DisplayName("Изменение email без авторизации возвращает statusCode 401")
@@ -118,7 +118,7 @@ public class ChangingCustomerDataTest {
             customerClient.deleteCustomer(customer, accessToken);
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(changing);
+        assertFalse("Внимание! Изменен пароль без авторизации", changing);
     }
 
     @DisplayName("Изменение пароля без авторизации возвращает statusCode 401")
@@ -144,7 +144,7 @@ public class ChangingCustomerDataTest {
             customerClient.deleteCustomer(customer, accessToken);
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(changing);
+        assertFalse("Внимание! Изменено имя без авторизации", changing);
     }
 
     @DisplayName("Изменение имени без авторизации возвращает statusCode 401")

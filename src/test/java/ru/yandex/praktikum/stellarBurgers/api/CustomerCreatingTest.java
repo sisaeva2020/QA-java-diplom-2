@@ -31,7 +31,7 @@ public class CustomerCreatingTest {
         Customer customer = Customer.getRandom();
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         customerClient.deleteCustomer(customer, accessToken);
-        assertNotNull(accessToken);
+        assertNotNull("Внимание! Вернулся пустой токен", accessToken);
     }
 
     @DisplayName("Успешное создание покупателя с корректными данными возвращает True")
@@ -42,7 +42,7 @@ public class CustomerCreatingTest {
         CustomerCredentials customerCredentials = new CustomerCredentials(customer.email, customer.password);
         login = customerClient.authCustomerWithValidDataReturnAccessToken(customerCredentials).substring(7);
         customerClient.deleteCustomer(customer, login);
-        assertTrue(success);
+        assertTrue("Внимание! Покупатель не был создан", success);
     }
 
     @DisplayName("Успешное создание покупателя с корректными данными возвращает StatusCode 200")
@@ -69,7 +69,7 @@ public class CustomerCreatingTest {
         } catch (IllegalArgumentException exception) {
         } catch (NullPointerException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Зарегистрирован дубликат покупателя", success);
     }
 
     @DisplayName("Попытка регистрации пользователя с данными, которые уже используются, возвращает statusCode 403")
@@ -100,7 +100,7 @@ public class CustomerCreatingTest {
         } catch (NullPointerException exception) {
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Зарегистрирован покупатель без email", success);
     }
 
     @DisplayName("Попытка регистрации пользователя без email возвращает statusCode 403")
@@ -130,7 +130,7 @@ public class CustomerCreatingTest {
         } catch (IllegalArgumentException exception) {
         } catch (NullPointerException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Зарегистрирован покупатель без пароля", success);
     }
 
     @DisplayName("Попытка регистрации пользователя без пароля возвращает statusCode 403")
@@ -160,7 +160,7 @@ public class CustomerCreatingTest {
         } catch (IllegalArgumentException exception) {
         } catch (NullPointerException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Зарегистрирован покупатель без имени", success);
     }
 
     @DisplayName("Попытка регистрации пользователя без имени возвращает statusCode 403")

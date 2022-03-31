@@ -34,7 +34,7 @@ public class OrderCreatingTest {
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         newOrder = orderClient.createOrderReturnTrue(new Ingredient(orderComposition), accessToken);
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertTrue(newOrder);
+        assertTrue("Внимание! Заказ не создан", newOrder);
     }
 
     @DisplayName("Успешное создание заказа возвращает StatusCode 200")
@@ -54,7 +54,7 @@ public class OrderCreatingTest {
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         newOrder = orderClient.createOrderReturnTrue(new Ingredient(orderComposition), "");
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertFalse(newOrder);
+        assertFalse("Внимание! Создался заказ без авторизации!", newOrder);
     }
 
     @DisplayName("Создание заказа с нулевым токеном возвращает statusCode 401")
@@ -78,7 +78,7 @@ public class OrderCreatingTest {
         String expectedMessage = "accessToken cannot be null";
         String actualMessage = exception.getMessage();
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertTrue(actualMessage.contains(expectedMessage));
+        assertTrue("Внимание! Создался заказ без токена!", actualMessage.contains(expectedMessage));
     }
 
     @DisplayName("Создание заказа без ингредиентов возвращает False")
@@ -88,7 +88,7 @@ public class OrderCreatingTest {
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         newOrder = orderClient.createOrderReturnTrue(new Ingredient(null), accessToken);
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertFalse(newOrder);
+        assertFalse("Внимание! Создался заказ без ингредиентов!", newOrder);
     }
 
     @DisplayName("Создание заказа без ингредиентов возвращает statusCode 400")

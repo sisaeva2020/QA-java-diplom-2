@@ -32,7 +32,7 @@ public class GetCustomerOrderTest {
         orderClient.createOrderReturnTrue(new Ingredient(orderComposition), accessToken);
         success = orderClient.getOrdersFromSpecificCustomerReturnTrue(accessToken);
         customerClient.deleteCustomer(customer, accessToken);
-        assertTrue(success);
+        assertTrue("Внимание! Запрос заказов не удался", success);
     }
 
     @DisplayName("Успешный запрос заказов конкретного покупателя с авторизацией возвращает StatusCode 200")
@@ -54,7 +54,7 @@ public class GetCustomerOrderTest {
         orderClient.createOrderReturnTrue(new Ingredient(orderComposition), accessToken);
         success = orderClient.getOrdersFromSpecificCustomerReturnTrue("");
         customerClient.deleteCustomer(customer, accessToken);
-        assertFalse(success);
+        assertFalse("Внимание! Вернулся список заказов покупателя с нулевым токеном", success);
     }
 
     @DisplayName("Запрос заказов конкретного покупателя без авторизации - с нулевым токеном возвращает statusCode 401")
@@ -65,7 +65,7 @@ public class GetCustomerOrderTest {
         orderClient.createOrderReturnTrue(new Ingredient(orderComposition), accessToken);
         statusCode = orderClient.getOrdersFromSpecificCustomerReturnStatusCode("");
         customerClient.deleteCustomer(customer, accessToken);
-        assertEquals("Внимание! Запрошен список заказов покупателя с нулевым токеном", 401, statusCode);
+        assertEquals("Внимание! Вернулся список заказов покупателя с нулевым токеном", 401, statusCode);
     }
 
     @DisplayName("Запрос заказов конкретного покупателя без авторизации - без токена возвращает exception")
@@ -80,6 +80,6 @@ public class GetCustomerOrderTest {
         String expectedMessage = "accessToken cannot be null";
         String actualMessage = exception.getMessage();
         customerClient.deleteCustomer(customer, accessToken);
-        assertTrue(actualMessage.contains(expectedMessage));
+        assertTrue("Внимание! Вернулся список заказов покупателя без токена", actualMessage.contains(expectedMessage));
     }
 }

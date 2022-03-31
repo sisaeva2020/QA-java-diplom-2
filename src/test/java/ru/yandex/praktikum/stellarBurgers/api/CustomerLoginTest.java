@@ -31,7 +31,7 @@ public class CustomerLoginTest {
         CustomerCredentials customerCredentials = new CustomerCredentials(customer.email, customer.password);
         success = customerClient.authCustomerWithValidDataReturnTrue(customerCredentials);
         customerClient.deleteCustomer(customer, accessToken);
-        assertTrue(success);
+        assertTrue("Внимание! Авторизация не удалась", success);
     }
 
     @DisplayName("Успешная авторизация возвращает StatusCode 200")
@@ -56,7 +56,7 @@ public class CustomerLoginTest {
             customerClient.deleteCustomer(customer, accessToken);
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Авторизирован покупатель с некорректным email", success);
     }
 
     @DisplayName("При авторизации с некорректным email возвращается statusCode 401")
@@ -84,7 +84,7 @@ public class CustomerLoginTest {
             customerClient.deleteCustomer(customer, accessToken);
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Авторизирован покупатель с некорректным паролем", success);
     }
 
     @DisplayName("При авторизации с некорректным паролем возвращается statusCode 401")
@@ -112,7 +112,7 @@ public class CustomerLoginTest {
             customerClient.deleteCustomer(customer, accessToken);
         } catch (IllegalArgumentException exception) {
         }
-        assertFalse(success);
+        assertFalse("Внимание! Авторизирован покупатель с некорректным email и паролем", success);
     }
 
     @DisplayName("При авторизации с некорректным email и паролем возвращается statusCode 401")
