@@ -1,6 +1,7 @@
 package ru.yandex.praktikum.stellarBurgers.api;
 
 import io.qameta.allure.Step;
+import io.restassured.response.Response;
 import ru.yandex.praktikum.stellarBurgers.api.model.Customer;
 import ru.yandex.praktikum.stellarBurgers.api.model.CustomerCredentials;
 
@@ -10,7 +11,7 @@ public class CustomerClient extends StellarBurgersRestClient {
     public final String PATH = BASE_URL + "auth/";
     Customer customer;
 
-    @Step("Создание покупателя {customer} возвращает Token")
+    @Step("Создание покупателя {customer}")
     public String createCustomerReturnAccessToken(Customer customer) {
         return given()
                 .spec(getBaseSpec())
@@ -22,92 +23,33 @@ public class CustomerClient extends StellarBurgersRestClient {
                 .path("accessToken");
     }
 
-    @Step("Создание покупателя {customer} возвращает True")
-    public boolean createCustomerReturnTrue(Customer customer) {
+    @Step("Создание покупателя {customer}")
+    public Response getSuccessfulCreateCustomerResponse(Customer customer) {
         return given()
                 .spec(getBaseSpec())
                 .body(customer)
                 .when()
-                .post(PATH + "register/")
-                .then()
-                .extract()
-                .path("success");
-    }
-
-    @Step("Создание покупателя {customer} возвращает statusCode")
-    public int createCustomerReturnStatusCode(Customer customer) {
-        return given()
-                .spec(getBaseSpec())
-                .body(customer)
-                .when()
-                .post(PATH + "register/")
-                .then()
-                .extract()
-                .statusCode();
+                .post(PATH + "register/");
     }
 
     @Step("Изменение данных покупателя {customer}")
-    public boolean successfulChangingCustomerData(Customer customer, String accessToken) {
+    public Response getSuccessfulChangingCustomerDataResponse(Customer customer, String accessToken) {
 
         return given()
                 .spec(getBaseSpec())
                 .auth().oauth2(accessToken)
                 .body(customer)
                 .when()
-                .patch(PATH + "user/")
-                .then()
-                .extract()
-                .path("success");
-    }
-
-    @Step("Изменение данных покупателя  {customer} возвращает statusCode")
-    public int successfulChangingCustomerDataStatusCode(Customer customer, String accessToken) {
-
-        return given()
-                .spec(getBaseSpec())
-                .auth().oauth2(accessToken)
-                .body(customer)
-                .when()
-                .patch(PATH + "user/")
-                .then()
-                .extract()
-                .statusCode();
+                .patch(PATH + "user/");
     }
 
     @Step("Успешная авторизация {customerCredentials}")
-    public boolean authCustomerWithValidDataReturnTrue(CustomerCredentials customerCredentials) {
+    public Response getAuthCustomerWithValidDataResponse(CustomerCredentials customerCredentials) {
         return given()
                 .spec(getBaseSpec())
                 .body(customerCredentials)
                 .when()
-                .post(PATH + "login/")
-                .then()
-                .extract()
-                .path("success");
-    }
-
-    @Step("Успешная авторизация {customerCredentials} возвращает accessToken")
-    public String authCustomerWithValidDataReturnAccessToken(CustomerCredentials customerCredentials) {
-        return given()
-                .spec(getBaseSpec())
-                .body(customerCredentials)
-                .when()
-                .post(PATH + "login/")
-                .then()
-                .extract()
-                .path("accessToken");
-    }
-
-    @Step("Успешная авторизация {customerCredentials} возвращает statusCode 200")
-    public int authCustomerWithValidDataReturnStatusCode(CustomerCredentials customerCredentials) {
-        return given()
-                .spec(getBaseSpec())
-                .body(customerCredentials)
-                .when()
-                .post(PATH + "login/")
-                .then()
-                .extract()
-                .statusCode();
+                .post(PATH + "login/");
     }
 
     @Step("Удаление покупателя {customer}")

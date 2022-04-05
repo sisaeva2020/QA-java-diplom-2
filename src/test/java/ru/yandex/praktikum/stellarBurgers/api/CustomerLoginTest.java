@@ -1,6 +1,7 @@
 package ru.yandex.praktikum.stellarBurgers.api;
 
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,109 +24,67 @@ public class CustomerLoginTest {
         customerClient = new CustomerClient();
     }
 
-    @DisplayName("Успешная авторизация возвращает True")
+    @DisplayName("Успешная авторизация")
     @Test
-    public void customerCanBeLoginWithValidDataReturnTrue() {
+    public void customerCanBeLoginWithValidData() {
         Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
+        customerClient.createCustomerReturnAccessToken(customer);
         CustomerCredentials customerCredentials = new CustomerCredentials(customer.email, customer.password);
-        success = customerClient.authCustomerWithValidDataReturnTrue(customerCredentials);
-        customerClient.deleteCustomer(customer, accessToken);
-        assertTrue("Внимание! Авторизация не удалась", success);
+        Response response = customerClient.getAuthCustomerWithValidDataResponse(customerCredentials);
+        accessToken = response.then().extract().path("accessToken");
+        customerClient.deleteCustomer(customer, accessToken.substring(7));
+        assertEquals("Внимание! StatusCode некорректный (не 200)", 200, response.statusCode());
+        assertTrue("Внимание! Авторизация не удалась", response.then().extract().path("success"));
     }
 
-    @DisplayName("Успешная авторизация возвращает StatusCode 200")
+    @DisplayName("Авторизация с некорректным email")
     @Test
-    public void customerCanBeLoginWithValidDataReturnStatusCode200() {
+    public void errorWhenLoginWithIncorrectEmail() {
         Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        CustomerCredentials customerCredentials = new CustomerCredentials(customer.email, customer.password);
-        statusCode = customerClient.authCustomerWithValidDataReturnStatusCode(customerCredentials);
-        customerClient.deleteCustomer(customer, accessToken);
-        assertEquals("Внимание! StatusCode некорректный (не 200)", 200, statusCode);
-    }
-
-    @DisplayName("При авторизации с некорректным email возвращается False")
-    @Test
-    public void errorWhenLoginWithIncorrectEmailReturnFalse() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
+        customerClient.createCustomerReturnAccessToken(customer);
         CustomerCredentials customerCredentials = new CustomerCredentials(email, customer.password);
-        success = customerClient.authCustomerWithValidDataReturnTrue(customerCredentials);
+        Response response = customerClient.getAuthCustomerWithValidDataResponse(customerCredentials);
         try {
-            customerClient.deleteCustomer(customer, accessToken);
+            accessToken = response.then().extract().path("accessToken");
+            customerClient.deleteCustomer(customer, accessToken.substring(7));
         } catch (IllegalArgumentException exception) {
+        } catch (NullPointerException exception) {
         }
-        assertFalse("Внимание! Авторизирован покупатель с некорректным email", success);
+        assertEquals("Внимание! StatusCode некорректный (не 401)", 401, response.statusCode());
+        assertFalse("Внимание! Авторизирован покупатель с некорректным email", response.then().extract().path("success"));
     }
 
-    @DisplayName("При авторизации с некорректным email возвращается statusCode 401")
+    @DisplayName("Авторизация с некорректным паролем")
     @Test
-    public void errorWhenLoginWithIncorrectEmailReturnStatusCode200() {
+    public void errorWhenLoginWithIncorrectPassword() {
         Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        CustomerCredentials customerCredentials = new CustomerCredentials(email, customer.password);
-        statusCode = customerClient.authCustomerWithValidDataReturnStatusCode(customerCredentials);
-        try {
-            customerClient.deleteCustomer(customer, accessToken);
-        } catch (IllegalArgumentException exception) {
-        }
-        assertEquals("Внимание! Авторизирован покупатель с некорректным email", 401, statusCode);
-    }
-
-    @DisplayName("При авторизации с некорректным паролем возвращается False")
-    @Test
-    public void errorWhenLoginWithIncorrectPasswordReturnFalse() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
+        customerClient.createCustomerReturnAccessToken(customer);
         CustomerCredentials customerCredentials = new CustomerCredentials(customer.email, password);
-        success = customerClient.authCustomerWithValidDataReturnTrue(customerCredentials);
+        Response response = customerClient.getAuthCustomerWithValidDataResponse(customerCredentials);
         try {
-            customerClient.deleteCustomer(customer, accessToken);
+            accessToken = response.then().extract().path("accessToken");
+            customerClient.deleteCustomer(customer, accessToken.substring(7));
         } catch (IllegalArgumentException exception) {
+        } catch (NullPointerException exception) {
         }
-        assertFalse("Внимание! Авторизирован покупатель с некорректным паролем", success);
+        assertEquals("Внимание! StatusCode некорректный (не 401)", 401, response.statusCode());
+        assertFalse("Внимание! Авторизирован покупатель с некорректным паролем", response.then().extract().path("success"));
     }
 
-    @DisplayName("При авторизации с некорректным паролем возвращается statusCode 401")
+    @DisplayName("Авторизация с некорректным email и паролем")
     @Test
-    public void errorWhenLoginWithIncorrectPasswordReturnStatusCode401() {
+    public void errorWhenLoginWithIncorrectEmailAndPassword() {
         Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        CustomerCredentials customerCredentials = new CustomerCredentials(customer.email, password);
-        statusCode = customerClient.authCustomerWithValidDataReturnStatusCode(customerCredentials);
-        try {
-            customerClient.deleteCustomer(customer, accessToken);
-        } catch (IllegalArgumentException exception) {
-        }
-        assertEquals("Внимание! Авторизирован покупатель с некорректным паролем", 401, statusCode);
-    }
-
-    @DisplayName("При авторизации с некорректным email и паролем возвращается False")
-    @Test
-    public void errorWhenLoginWithIncorrectEmailAndPasswordReturnFalse() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
+        customerClient.createCustomerReturnAccessToken(customer);
         CustomerCredentials customerCredentials = new CustomerCredentials(email, password);
-        success = customerClient.authCustomerWithValidDataReturnTrue(customerCredentials);
+        Response response = customerClient.getAuthCustomerWithValidDataResponse(customerCredentials);
         try {
-            customerClient.deleteCustomer(customer, accessToken);
+            accessToken = response.then().extract().path("accessToken");
+            customerClient.deleteCustomer(customer, accessToken.substring(7));
         } catch (IllegalArgumentException exception) {
+        } catch (NullPointerException exception) {
         }
-        assertFalse("Внимание! Авторизирован покупатель с некорректным email и паролем", success);
-    }
-
-    @DisplayName("При авторизации с некорректным email и паролем возвращается statusCode 401")
-    @Test
-    public void errorWhenLoginWithIncorrectEmailAndPasswordReturnStatusCode401() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        CustomerCredentials customerCredentials = new CustomerCredentials(email, password);
-        statusCode = customerClient.authCustomerWithValidDataReturnStatusCode(customerCredentials);
-        try {
-            customerClient.deleteCustomer(customer, accessToken);
-        } catch (IllegalArgumentException exception) {
-        }
-        assertEquals("Внимание! Авторизирован покупатель с некорректным email и паролем", 401, statusCode);
+        assertEquals("Внимание! StatusCode некорректный (не 401)", 401, response.statusCode());
+        assertFalse("Внимание! Авторизирован покупатель с некорректным email и паролем", response.then().extract().path("success"));
     }
 }

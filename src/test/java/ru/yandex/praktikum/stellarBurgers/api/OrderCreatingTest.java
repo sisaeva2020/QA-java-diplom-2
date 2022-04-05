@@ -1,6 +1,7 @@
 package ru.yandex.praktikum.stellarBurgers.api;
 
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 import ru.yandex.praktikum.stellarBurgers.api.model.Customer;
@@ -15,9 +16,6 @@ public class OrderCreatingTest {
     private Ingredient ingredients;
     private Customer customer;
     String accessToken;
-    boolean newOrder;
-    int statusCode;
-    String orderError;
     String[] orderComposition = new String[]{"61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f", "61c0c5a71d1f82001bdaaa72"};
     String[] incorrectHashIngr = new String[]{"61c0c5a71d1f82001bdaaa", "61c0c5a71d1f82001bdaaa6f", "61c0c5a71d1f82001bdaaa72"};
 
@@ -27,53 +25,35 @@ public class OrderCreatingTest {
         orderClient = new OrderClient();
     }
 
-    @DisplayName("Успешное создание заказа возвращает True")
+    @DisplayName("Успешное создание заказа")
     @Test
-    public void orderWithAuthReturnTrue() {
+    public void orderWithAuth() {
         Customer customer = Customer.getRandom();
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        newOrder = orderClient.createOrderReturnTrue(new Ingredient(orderComposition), accessToken);
+        Response response = orderClient.getSuccessfulCreateOrderResponse(new Ingredient(orderComposition), accessToken);
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertTrue("Внимание! Заказ не создан", newOrder);
+        assertEquals("Внимание! StatusCode некорректный (не 200)", 200, response.statusCode());
+        assertTrue("Внимание! Заказ не создан", response.then().extract().path("success"));
     }
 
-    @DisplayName("Успешное создание заказа возвращает StatusCode 200")
+    @DisplayName("Создание заказа с нулевым токеном")
     @Test
-    public void orderWithAuthReturnStatusCode200() {
+    public void errorWhenCreateOrderWithoutToken() {
         Customer customer = Customer.getRandom();
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        statusCode = orderClient.createOrderReturnStatusCode(new Ingredient(orderComposition), accessToken);
+        Response response = orderClient.getSuccessfulCreateOrderResponse(new Ingredient(orderComposition), "");
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertEquals("Внимание! StatusCode некорректный (не 200)", 200, statusCode);
+        assertEquals("Внимание! StatusCode некорректный (не 401)", 401, response.statusCode());
+        assertFalse("Внимание! Создался заказ без авторизации!", response.then().extract().path("success"));
     }
 
-    @DisplayName("Создание заказа с нулевым токеном возвращает False")
+    @DisplayName("Создание заказа без токена")
     @Test
-    public void errorWhenCreateOrderWithoutAuthReturnFalse() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        newOrder = orderClient.createOrderReturnTrue(new Ingredient(orderComposition), "");
-        customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertFalse("Внимание! Создался заказ без авторизации!", newOrder);
-    }
-
-    @DisplayName("Создание заказа с нулевым токеном возвращает statusCode 401")
-    @Test
-    public void errorWhenCreateOrderWithoutAuthReturnStatusCode401() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        statusCode = orderClient.createOrderReturnStatusCode(new Ingredient(orderComposition), "");
-        customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertEquals("Внимание! Создался заказ без авторизации!", 401, statusCode);
-    }
-
-    @DisplayName("Создание заказа без токена возвращает exception")
-    @Test
-    public void errorWhenCreateOrderWithoutAuthReturnException() {
+    public void errorWhenCreateOrderWithNullToken() {
         Customer customer = Customer.getRandom();
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            orderClient.createOrderReturnStatusCode(new Ingredient(orderComposition), null);
+            Response response = orderClient.getSuccessfulCreateOrderResponse(new Ingredient(orderComposition), null);
         });
         String expectedMessage = "accessToken cannot be null";
         String actualMessage = exception.getMessage();
@@ -81,43 +61,25 @@ public class OrderCreatingTest {
         assertTrue("Внимание! Создался заказ без токена!", actualMessage.contains(expectedMessage));
     }
 
-    @DisplayName("Создание заказа без ингредиентов возвращает False")
+    @DisplayName("Создание заказа без ингредиентов")
     @Test
-    public void errorWhenCreateOrderWithoutIngredientsReturnFalse() {
+    public void errorWhenCreateOrderWithoutIngredients() {
         Customer customer = Customer.getRandom();
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        newOrder = orderClient.createOrderReturnTrue(new Ingredient(null), accessToken);
+        Response response = orderClient.getSuccessfulCreateOrderResponse(new Ingredient(null), accessToken);
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertFalse("Внимание! Создался заказ без ингредиентов!", newOrder);
+        assertEquals("Внимание! StatusCode некорректный (не 400)", 400, response.statusCode());
+        assertFalse("Внимание! Создался заказ без ингредиентов!", response.then().extract().path("success"));
     }
 
-    @DisplayName("Создание заказа без ингредиентов возвращает statusCode 400")
+    @DisplayName("Создание заказа с некорректным хэшем ингредиентов")
     @Test
-    public void errorWhenCreateOrderWithoutIngredientsReturnStatusCode400() {
+    public void errorWhenCreateOrderWithIncorrectIngredientsHash() {
         Customer customer = Customer.getRandom();
         accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        statusCode = orderClient.createOrderReturnStatusCode(new Ingredient(null), accessToken);
+        Response response = orderClient.getSuccessfulCreateOrderResponse(new Ingredient(incorrectHashIngr), accessToken);
         customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertEquals("Внимание! Создался заказ без ингредиентов", 400, statusCode);
-    }
-
-    @DisplayName("Создание заказа с некорректным хэшем ингредиентов возвращает Internal Server Error")
-    @Test
-    public void errorWhenCreateOrderWithIncorrectIngredientsHashReturnFalse() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        orderError = orderClient.createOrderReturnError(new Ingredient(incorrectHashIngr), accessToken);
-        customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertEquals("Internal Server Error", orderError.substring(107, 128));
-    }
-
-    @DisplayName("Создание заказа с некорректным хэшем ингредиентов возвращает statusCode 500")
-    @Test
-    public void errorWhenCreateOrderWithIncorrectIngredientsHashReturnStatusCode500() {
-        Customer customer = Customer.getRandom();
-        accessToken = customerClient.createCustomerReturnAccessToken(customer).substring(7);
-        statusCode = orderClient.createOrderReturnStatusCode(new Ingredient(incorrectHashIngr), accessToken);
-        customerClient.deleteCustomer(new Customer(customer.email, customer.password, customer.name), accessToken);
-        assertEquals("Внимание! Создался заказ с некорректными ингредиентами", 500, statusCode);
+        assertEquals("Internal Server Error", response.then().extract().body().asPrettyString().substring(107, 128));
+        assertEquals("Внимание! StatusCode некорректный (не 500)", 500, response.statusCode());
     }
 }
